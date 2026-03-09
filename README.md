@@ -54,7 +54,7 @@ export default buildConfig({
         type: 'service_account', // or process.env.GA_ANALYTIC_TYPE
         clientEmail: process.env.GA_ANALYTIC_CLIENT_EMAIL!,
         // Note: ensure \n is handled properly if parsed from .env string
-        privateKey: process.env.GA_ANALYTIC_PRIVATE_KEY!.replace(/\\n/g, '\n'),
+        privateKey: process.env.GA_ANALYTIC_PRIVATE_KEY!,
       },
 
       defaultTimeframe: '30d',
