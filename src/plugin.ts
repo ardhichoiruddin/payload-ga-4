@@ -5,7 +5,7 @@ import { createAnalyticsView } from './components/AnalyticView.js'
 import { createAnalyticsWidget } from './components/AnalyticsWidget.js'
 import { createNavLink } from './components/NavLink.js'
 
-export const gaAnalyticsPlugin =
+export const payloadGa4 =
   (options: GAPluginOptions) =>
   (incomingConfig: Config): Config => {
     if (options.enabled === false) return incomingConfig

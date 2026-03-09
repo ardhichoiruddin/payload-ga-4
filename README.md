@@ -1,218 +1,116 @@
-# Payload Plugin Template
+# Google Analytics 4 (GA4) Plugin for Payload CMS
 
-A template repo to create a [Payload CMS](https://payloadcms.com) plugin.
+Add Google Analytics 4 (GA4) widgets and dashboards directly to your Payload CMS admin panel using your Google Developer Service Account credentials.
 
-Payload is built with a robust infrastructure intended to support Plugins with ease. This provides a simple, modular, and reusable way for developers to extend the core capabilities of Payload.
+## Features
 
-To build your own Payload plugin, all you need is:
+- Custom Analytics Dashboard View (`/analytics`)
+- Widgets that can be placed in Dashboard, Collections, or Globals
+- Support for multiple timeframes (7d, 30d, 90d)
+- Service Account based authentication (No OAuth screens required)
 
-- An understanding of the basic Payload concepts
-- And some JavaScript/Typescript experience
+## Installation
 
-## Background
+```bash
+npm install payload-ga-4
+# or
+yarn add payload-ga-4
+# or
+pnpm add payload-ga-4
+```
 
-Here is a short recap on how to integrate plugins with Payload, to learn more visit the [plugin overview page](https://payloadcms.com/docs/plugins/overview).
+## Setup Google Analytics
 
-### How to install a plugin
+To use this plugin, you'll need a Google Cloud Service Account and a GA4 Property ID.
 
-To install any plugin, simply add it to your payload.config() in the Plugin array.
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new Service Account and download the JSON key.
+3. Keep note of the `client_email` and `private_key` from the JSON.
+4. Go to [Google Analytics Admin](https://analytics.google.com/)
+5. Find your GA4 **Property ID** (Admin > Property Settings).
+6. Give your **Service Account email** "Viewer" access to your GA4 property under Property Access Management.
 
-```ts
-import myPlugin from 'my-plugin'
+## Configuration
 
-export const config = buildConfig({
+Import the `payloadGa4` plugin and add it to your `payload.config.ts`.
+
+```typescript
+import { buildConfig } from 'payload'
+import { payloadGa4 } from 'payload-ga-4'
+
+export default buildConfig({
+  // ... other payload config
   plugins: [
-    // You can pass options to the plugin
-    myPlugin({
+    payloadGa4({
       enabled: true,
+      
+      // Look for the Property ID in Google Analytics Admin > Property > Property Settings
+      propertyId: process.env.GA_PROPERTY_ID!,
+      
+      // Google Service Account Credentials
+      credentials: {
+        type: 'service_account', // or process.env.GA_ANALYTIC_TYPE
+        clientEmail: process.env.GA_ANALYTIC_CLIENT_EMAIL!,
+        // Note: ensure \n is handled properly if parsed from .env string
+        privateKey: process.env.GA_ANALYTIC_PRIVATE_KEY!.replace(/\\n/g, '\n'),
+      },
+
+      defaultTimeframe: '30d',
+      
+      // Where to show the analytics dashboard widget
+      placement: ['dashboard', 'root'],
+      
+      // Widget specific config
+      widget: {
+        title: 'Google Analytics',
+      },
+      
+      // Access control for the analytics data
+      access: async (user) => {
+        return user ? true : false
+      },
     }),
   ],
 })
 ```
 
-### Initialization
+## Options
 
-The initialization process goes in the following order:
+| Option | Type | Description |
+|--------|------|-------------|
+| `enabled` | `boolean` | Whether to enable the plugin (default: `false`). |
+| `propertyId` | `string` | **Required.** Your GA4 Property ID. |
+| `credentials.type` | `string` | Typically `'serviceAccount'` / `'service_account'` |
+| `credentials.clientEmail` | `string` | **Required.** Service account client email. |
+| `credentials.privateKey` | `string` | **Required.** Service account private key. |
+| `defaultTimeframe` | `'7d' \| '30d' \| '90d'` | Default timeframe for fetching data. |
+| `placement` | `PlacementSlot \| PlacementSlot[]` | Where to render the widget. See Placements below. |
+| `widget.title` | `string` | Title of the widget component. |
+| `widget.timeframe` | `'7d' \| '30d' \| '90d'` | Widget component default time period. |
+| `widget.detailPath` | `string` | Detailed analytics view path (matches your root view path if set). |
+| `path` | `string` | Custom path for the root analytics view (default: `/analytics`). |
+| `access` | `(user: any) => boolean \| Promise<boolean>` | Function to control access to analytics endpoints and view dashboard. |
 
-1. Incoming config is validated
-2. **Plugins execute**
-3. Default options are integrated
-4. Sanitization cleans and validates data
-5. Final config gets initialized
+## Placements
 
-## Building the Plugin
+Provide a plain string or an object to bind widgets to specific collections or globals:
 
-When you build a plugin, you are purely building a feature for your project and then abstracting it outside of the project.
+```typescript
+// Into the main dashboard before elements:
+placement: 'dashboard'
 
-### Template Files
+// As a separate view on the side nav root:
+placement: 'root'
 
-In the Payload [plugin template](https://github.com/payloadcms/payload/tree/main/templates/plugin), you will see a common file structure that is used across all plugins:
+// Bound to specific collections:
+placement: {
+  collection: 'pages',
+  position: 'afterList' // 'beforeList' | 'afterList' | 'beforeEdit' | 'afterEdit'
+}
 
-1. root folder
-2. /src folder
-3. /dev folder
-
-#### Root
-
-In the root folder, you will see various files that relate to the configuration of the plugin. We set up our environment in a similar manner in Payload core and across other projects, so hopefully these will look familiar:
-
-- **README**.md\* - This contains instructions on how to use the template. When you are ready, update this to contain instructions on how to use your Plugin.
-- **package**.json\* - Contains necessary scripts and dependencies. Overwrite the metadata in this file to describe your Plugin.
-- .**eslint**.config.js - Eslint configuration for reporting on problematic patterns.
-- .**gitignore** - List specific untracked files to omit from Git.
-- .**prettierrc**.json - Configuration for Prettier code formatting.
-- **tsconfig**.json - Configures the compiler options for TypeScript
-- .**swcrc** - Configuration for SWC, a fast compiler that transpiles and bundles TypeScript.
-- **vitest**.config.js - Config file for Vitest, defining how tests are run and how modules are resolved
-
-**IMPORTANT\***: You will need to modify these files.
-
-#### Dev
-
-In the dev folder, you’ll find a basic payload project, created with `npx create-payload-app` and the blank template.
-
-**IMPORTANT**: Make a copy of the `.env.example` file and rename it to `.env`. Update the `DATABASE_URL` to match the database you are using and your plugin name. Update `PAYLOAD_SECRET` to a unique string.
-**You will not be able to run `pnpm/yarn dev` until you have created this `.env` file.**
-
-`myPlugin` has already been added to the `payload.config()` file in this project.
-
-```ts
-plugins: [
-  myPlugin({
-    collections: {
-      posts: true,
-    },
-  }),
-]
-```
-
-Later when you rename the plugin or add additional options, **make sure to update it here**.
-
-You may wish to add collections or expand the test project depending on the purpose of your plugin. Just make sure to keep this dev environment as simplified as possible - users should be able to install your plugin without additional configuration required.
-
-When you’re ready to start development, initiate the project with `pnpm/npm/yarn dev` and pull up [http://localhost:3000](http://localhost:3000) in your browser.
-
-#### Src
-
-Now that we have our environment setup and we have a dev project ready to - it’s time to build the plugin!
-
-**index.ts**
-
-The essence of a Payload plugin is simply to extend the payload config - and that is exactly what we are doing in this file.
-
-```ts
-export const myPlugin =
-  (pluginOptions: MyPluginConfig) =>
-  (config: Config): Config => {
-    // do cool stuff with the config here
-
-    return config
-  }
-```
-
-First, we receive the existing payload config along with any plugin options.
-
-From here, you can extend the config as you wish.
-
-Finally, you return the config and that is it!
-
-##### Spread Syntax
-
-Spread syntax (or the spread operator) is a feature in JavaScript that uses the dot notation **(...)** to spread elements from arrays, strings, or objects into various contexts.
-
-We are going to use spread syntax to allow us to add data to existing arrays without losing the existing data. It is crucial to spread the existing data correctly – else this can cause adverse behavior and conflicts with Payload config and other plugins.
-
-Let’s say you want to build a plugin that adds a new collection:
-
-```ts
-config.collections = [
-  ...(config.collections || []),
-  // Add additional collections here
-]
-```
-
-First we spread the `config.collections` to ensure that we don’t lose the existing collections, then you can add any additional collections just as you would in a regular payload config.
-
-This same logic is applied to other properties like admin, hooks, globals:
-
-```ts
-config.globals = [
-  ...(config.globals || []),
-  // Add additional globals here
-]
-
-config.hooks = {
-  ...(incomingConfig.hooks || {}),
-  // Add additional hooks here
+// Bound to globals:
+placement: {
+  global: 'site-settings',
+  position: 'beforeEdit' // 'beforeEdit' | 'afterEdit'
 }
 ```
-
-Some properties will be slightly different to extend, for instance the onInit property:
-
-```ts
-import { onInitExtension } from './onInitExtension' // example file
-
-config.onInit = async (payload) => {
-  if (incomingConfig.onInit) await incomingConfig.onInit(payload)
-  // Add additional onInit code by defining an onInitExtension function
-  onInitExtension(pluginOptions, payload)
-}
-```
-
-If you wish to add to the onInit, you must include the **async/await**. We don’t use spread syntax in this case, instead you must await the existing `onInit` before running additional functionality.
-
-In the template, we have stubbed out some addition `onInit` actions that seeds in a document to the `plugin-collection`, you can use this as a base point to add more actions - and if not needed, feel free to delete it.
-
-##### Types.ts
-
-If your plugin has options, you should define and provide types for these options.
-
-```ts
-export type MyPluginConfig = {
-  /**
-   * List of collections to add a custom field
-   */
-  collections?: Partial<Record<CollectionSlug, true>>
-  /**
-   * Disable the plugin
-   */
-  disabled?: boolean
-}
-```
-
-If possible, include JSDoc comments to describe the options and their types. This allows a developer to see details about the options in their editor.
-
-##### Testing
-
-Having a test suite for your plugin is essential to ensure quality and stability. **Vitest** is a fast, modern testing framework that works seamlessly with Vite and supports TypeScript out of the box.
-
-Vitest organizes tests into test suites and cases, similar to other testing frameworks. We recommend creating individual tests based on the expected behavior of your plugin from start to finish.
-
-Writing tests with Vitest is very straightforward, and you can learn more about how it works in the [Vitest documentation.](https://vitest.dev/)
-
-For this template, we stubbed out `int.spec.ts` in the `dev` folder where you can write your tests.
-
-```ts
-describe('Plugin tests', () => {
-  // Create tests to ensure expected behavior from the plugin
-  it('some condition that must be met', () => {
-   // Write your test logic here
-   expect(...)
-  })
-})
-```
-
-## Best practices
-
-With this tutorial and the plugin template, you should have everything you need to start building your own plugin.
-In addition to the setup, here are other best practices aim we follow:
-
-- **Providing an enable / disable option:** For a better user experience, provide a way to disable the plugin without uninstalling it. This is especially important if your plugin adds additional webpack aliases, this will allow you to still let the webpack run to prevent errors.
-- **Include tests in your GitHub CI workflow**: If you’ve configured tests for your package, integrate them into your workflow to run the tests each time you commit to the plugin repository. Learn more about [how to configure tests into your GitHub CI workflow.](https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs)
-- **Publish your finished plugin to NPM**: The best way to share and allow others to use your plugin once it is complete is to publish an NPM package. This process is straightforward and well documented, find out more [creating and publishing a NPM package here.](https://docs.npmjs.com/creating-and-publishing-scoped-public-packages/).
-- **Add payload-plugin topic tag**: Apply the tag **payload-plugin **to your GitHub repository. This will boost the visibility of your plugin and ensure it gets listed with [existing payload plugins](https://github.com/topics/payload-plugin).
-- **Use [Semantic Versioning](https://semver.org/) (SemVar)** - With the SemVar system you release version numbers that reflect the nature of changes (major, minor, patch). Ensure all major versions reference their Payload compatibility.
-
-# Questions
-
-Please contact [Payload](mailto:dev@payloadcms.com) with any questions about using this plugin template.

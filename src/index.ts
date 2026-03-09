@@ -1,2 +1,2 @@
-export { gaAnalyticsPlugin } from './plugin.js'
+export { payloadGa4 } from './plugin.js'
 export type { GAPluginOptions } from './types.js'

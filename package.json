@@ -1,8 +1,11 @@
 {
-  "name": "",
-  "version": "1.0.0",
-  "description": "A blank template to get started with Payload 3.0",
+  "name": "payload-ga-4",
+  "version": "0.1.0",
+  "description": "Google Analytics 4 (GA4) plugin for Payload CMS. Add analytics widgets and dashboards to admin panel with service account authentication.",
   "license": "MIT",
+  "author": {
+    "name": "Ardhi Ch"
+  },
   "type": "module",
   "exports": {
     ".": {
@@ -21,8 +24,8 @@
       "default": "./src/exports/rsc.ts"
     }
   },
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
     "dist"
   ],
@@ -119,5 +122,29 @@
     "@google-analytics/data": "^5.2.1",
     "dotenv": "^17.3.1",
     "recharts": "^3.8.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ardhichoiruddin/payload-ga-4.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ardhichoiruddin/payload-ga-4/issues"
+  },
+  "homepage": "https://github.com/ardhichoiruddin/payload-ga-4#readme",
+  "keywords": [
+    "payload",
+    "payloadcms",
+    "payload-plugin",
+    "plugin",
+    "headless-cms",
+    "cms",
+    "analytics",
+    "google-analytics",
+    "google-analytics-4",
+    "ga4",
+    "dashboard-widget",
+    "admin-dashboard",
+    "nextjs",
+    "typescript"
+  ]
 }

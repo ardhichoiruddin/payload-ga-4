@@ -2,7 +2,7 @@ import { sqliteAdapter } from '@payloadcms/db-sqlite'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { buildConfig } from 'payload'
-import { gaAnalyticsPlugin } from '../src/index.js'
+import { payloadGa4 } from '../src/index.js'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 import * as dotenv from 'dotenv'
@@ -54,7 +54,7 @@ const buildConfigWithMemoryDB = async () => {
       await seed(payload)
     },
     plugins: [
-      gaAnalyticsPlugin({
+      payloadGa4({
         enabled: true,
         credentials: {
           type: process.env.GA_ANALYTIC_TYPE!,
