@@ -1,6 +1,6 @@
 {
   "name": "payload-ga-4",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Google Analytics 4 (GA4) plugin for Payload CMS. Add analytics widgets and dashboards to admin panel with service account authentication.",
   "license": "MIT",
   "author": {
