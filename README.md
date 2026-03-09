@@ -1,5 +1,7 @@
 # Google Analytics 4 (GA4) Plugin for Payload CMS
 
+![Payload GA4 Dashboard](https://raw.githubusercontent.com/ardhichoiruddin/payload-ga-4/refs/heads/main/assets/analytic-preview.png)
+
 Add Google Analytics 4 (GA4) widgets and dashboards directly to your Payload CMS admin panel using your Google Developer Service Account credentials.
 
 ## Features
