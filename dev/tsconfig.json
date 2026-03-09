@@ -31,5 +31,6 @@
     },
     "noEmit": true,
     "emitDeclarationOnly": false,
+    "jsx": "preserve"
   }
 }

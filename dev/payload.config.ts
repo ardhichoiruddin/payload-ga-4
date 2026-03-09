@@ -1,11 +1,11 @@
-import { mongooseAdapter } from '@payloadcms/db-mongodb'
+import { sqliteAdapter } from '@payloadcms/db-sqlite'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
-import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import path from 'path'
 import { buildConfig } from 'payload'
-import {  } from ''
+import { gaAnalyticsPlugin } from '../src/index.js'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
+import * as dotenv from 'dotenv'
 
 import { testEmailAdapter } from './helpers/testEmailAdapter.js'
 import { seed } from './seed.js'
@@ -13,22 +13,17 @@ import { seed } from './seed.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+dotenv.config({
+  path: path.resolve(dirname, '../.env'),
+})
+
 if (!process.env.ROOT_DIR) {
   process.env.ROOT_DIR = dirname
 }
 
+const databaseURL = 'file:./dev.sqlite'
+
 const buildConfigWithMemoryDB = async () => {
-  if (process.env.NODE_ENV === 'test') {
-    const memoryDB = await MongoMemoryReplSet.create({
-      replSet: {
-        count: 3,
-        dbName: 'payloadmemory',
-      },
-    })
-
-    process.env.DATABASE_URL = `${memoryDB.getUri()}&retryWrites=true`
-  }
-
   return buildConfig({
     admin: {
       importMap: {
@@ -48,9 +43,10 @@ const buildConfigWithMemoryDB = async () => {
         },
       },
     ],
-    db: mongooseAdapter({
-      ensureIndexes: true,
-      url: process.env.DATABASE_URL || '',
+    db: sqliteAdapter({
+      client: {
+        url: databaseURL,
+      },
     }),
     editor: lexicalEditor(),
     email: testEmailAdapter,
@@ -58,9 +54,21 @@ const buildConfigWithMemoryDB = async () => {
       await seed(payload)
     },
     plugins: [
-      ({
-        collections: {
-          posts: true,
+      gaAnalyticsPlugin({
+        enabled: true,
+        credentials: {
+          type: process.env.GA_ANALYTIC_TYPE!,
+          privateKey: process.env.GA_ANALYTIC_PRIVATE_KEY!,
+          clientEmail: process.env.GA_ANALYTIC_CLIENT_EMAIL!,
+        },
+        propertyId: process.env.GA_PROPERTY_ID!,
+        defaultTimeframe: '30d',
+        placement: ['dashboard', 'root'],
+        widget: {
+          title: 'Google Analytics',
+        },
+        access: async (user) => {
+          return user ? true : false
         },
       }),
     ],
