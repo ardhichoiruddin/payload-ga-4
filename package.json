@@ -111,6 +111,7 @@
   "dependencies": {
     "@google-analytics/data": "^5.2.1",
     "dotenv": "^17.3.1",
+    "google-auth-library": "^10.6.1",
     "recharts": "^3.8.0"
   },
   "repository": {
