@@ -74,7 +74,9 @@ export const AnalyticsWidgetClient: React.FC<Props> = ({ widgetOptions }) => {
           {widgetOptions?.title ?? '📊 Google Analytics — Last 7 Days'}
         </h3>
         <Link
-          href={widgetOptions?.detailPath ?? '/admin/analytics'}
+          href={
+            widgetOptions?.detailPath ? `/admin/${widgetOptions?.detailPath}` : '/admin/analytics'
+          }
           style={{ fontSize: '0.8rem', color: 'var(--theme-success)', textDecoration: 'none' }}
         >
           View Details →
