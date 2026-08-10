@@ -1,3 +1,5 @@
+
+
 # Google Analytics 4 (GA4) Plugin for Payload CMS
 
 ![Payload GA4 Dashboard](https://raw.githubusercontent.com/ardhichoiruddin/payload-ga-4/refs/heads/main/assets/analytic-preview.png)
@@ -31,6 +33,13 @@ To use this plugin, you'll need a Google Cloud Service Account and a GA4 Propert
 4. Go to [Google Analytics Admin](https://analytics.google.com/)
 5. Find your GA4 **Property ID** (Admin > Property Settings).
 6. Give your **Service Account email** "Viewer" access to your GA4 property under Property Access Management.
+7. Configure the credentials in your project's `.env` file:
+```env
+GA_PROPERTY_ID=YOUR_PROPERTY_ID
+GA_ANALYTIC_TYPE=service_account
+GA_ANALYTIC_CLIENT_EMAIL=YOUR_CLIENT_EMAIL
+GA_ANALYTIC_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYOUR_PRIVATE_KEY\n-----END PRIVATE KEY-----\n"
+```
 
 ## Configuration
 
